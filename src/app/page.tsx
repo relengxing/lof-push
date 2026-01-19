@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 
 interface LOFData {
   [key: string]: string;
@@ -17,10 +17,36 @@ interface ApiResult {
   error?: string;
 }
 
+interface ConfigResult {
+  disLimit: number;
+  preLimit: number;
+  maxItems: number;
+}
+
 export default function Home() {
-  const [disLimit, setDisLimit] = useState('-5');
-  const [preLimit, setPreLimit] = useState('5');
-  const [maxItems, setMaxItems] = useState('20');
+  const [disLimit, setDisLimit] = useState('');
+  const [preLimit, setPreLimit] = useState('');
+  const [maxItems, setMaxItems] = useState('');
+  const [configLoaded, setConfigLoaded] = useState(false);
+
+  // 从 API 获取默认配置
+  useEffect(() => {
+    fetch('/api/config')
+      .then((res) => res.json())
+      .then((config: ConfigResult) => {
+        setDisLimit(String(config.disLimit));
+        setPreLimit(String(config.preLimit));
+        setMaxItems(String(config.maxItems));
+        setConfigLoaded(true);
+      })
+      .catch(() => {
+        // 如果获取失败，使用前端默认值
+        setDisLimit('-5');
+        setPreLimit('5');
+        setMaxItems('20');
+        setConfigLoaded(true);
+      });
+  }, []);
   const [data, setData] = useState<LOFData[]>([]);
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
@@ -212,12 +238,12 @@ export default function Home() {
           </div>
 
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-            <button className="btn btn-secondary" onClick={fetchData} disabled={loading}>
+            <button className="btn btn-secondary" onClick={fetchData} disabled={loading || !configLoaded}>
               {loading && <span className="spinner" />}
               {loading ? '加载中...' : '查询数据'}
             </button>
 
-            <button className="btn btn-primary" onClick={sendToWechat} disabled={sending}>
+            <button className="btn btn-primary" onClick={sendToWechat} disabled={sending || !configLoaded}>
               {sending && <span className="spinner" />}
               {sending ? '推送中...' : '推送到企微'}
             </button>

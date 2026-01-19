@@ -156,7 +156,7 @@ export class LOFService {
       const discountValue = parseFloat(item['折溢价'] || '0');
       
       // 根据折溢价率设置颜色：折价用绿色(info)，溢价用橙色(warning)
-      const colorTag = discountValue > 0 ? 'info' : discountValue < 0 ? 'warning' : 'comment';
+      const colorTag = discountValue > 0 ? 'warning' : discountValue < 0 ? 'info' : 'comment';
       const discountText = `<font color="${colorTag}">${item['折溢价']}%</font>`;
       
       // 申购状态：开放用绿色，其他用灰色
